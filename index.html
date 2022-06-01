@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JIRA export PDF render</title>
+    <style>
+        .pdfobject-container {
+            height: 50rem;
+            margin:1rem;
+        }
+    </style>
+</head>
+<body>
+<input type="file" class="form-control" accept=".csv" id="input">
+<div id="output"></div>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js" integrity="sha256-Ue6wom48SQbpmwW9QIk7pyVDR5Bg36SetP67V2pDkxc=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfobject@2.2.8/pdfobject.min.js" integrity="sha256-tu9j5pBilBQrWSDePOOajCUdz6hWsid/lBNzK4KgEPM=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.js" integrity="sha256-ydQBJSsRf9GW2ZJolDHHVVRuaO3jmu1Ckvhjx78/7Fk=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.24/dist/jspdf.plugin.autotable.js" integrity="sha256-UiRpu4+zSiSpJ6UzKgqSXYtzd4uCfVtSvJbAjEREnsw=" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+        window.jsPDF = window.jspdf.jsPDF;
+        let fileInput = document.getElementById('input');
+
+        fileInput.addEventListener('change', function () {
+            Papa.parse(fileInput.files[0], {
+                header: true,
+                complete: function(results, file) {
+                    if (results.errors) {
+                        console.warn('Parse CSV errors', results.errors);
+                    }
+                    constructPdf(results.data);
+                }
+            });
+        }, false);
+    });
+
+    function constructPdf(dataArray) {
+        let groupedData = [];
+        let totalTime = 0;
+        dataArray.forEach(function (arrayItem) {
+            let newTime = parseFloat(arrayItem['Time Spent (h)']);
+            if (arrayItem.Key && newTime > 0) {
+                if (!(arrayItem.Key in groupedData)) {
+                    groupedData[arrayItem.Key] = {
+                        'Key': arrayItem['Key'],
+                        'Descriptions': [
+                            arrayItem['Work Description']
+                        ],
+                        'Time': parseFloat(arrayItem['Time Spent (h)'])
+                    }
+                } else {
+                    groupedData[arrayItem.Key]['Time'] = groupedData[arrayItem.Key]['Time'] + newTime;
+                    groupedData[arrayItem.Key]['Descriptions'].push(arrayItem['Work Description']);
+                }
+                totalTime = totalTime + newTime;
+            }
+        });
+
+        let formattedData = [];
+        Object.values(groupedData).forEach(function (data) {
+            let descriptionsLength = data.Descriptions.length;
+            if (descriptionsLength > 1) {
+                formattedData.push([
+                    {
+                        rowSpan: descriptionsLength,
+                        content: data.Key,
+                        styles: { valign: 'top', halign: 'left' },
+                    },
+                    data.Descriptions[0],
+                    {
+                        rowSpan: descriptionsLength,
+                        content: data.Time,
+                        styles: { valign: 'top', halign: 'right' },
+                    }
+                ]);
+                for (let i = 1; i < descriptionsLength; i++) {
+                    formattedData.push([
+                        data.Descriptions[i]
+                    ]);
+                }
+            } else {
+                formattedData.push([
+                    {
+                        rowSpan: 1,
+                        content: data.Key,
+                        styles: { valign: 'top', halign: 'left' },
+                    },
+                    data.Descriptions[0],
+                    {
+                        rowSpan: 1,
+                        content: data.Time,
+                        styles: { valign: 'top', halign: 'right' },
+                    }
+                ]);
+            }
+        });
+
+        formattedData.push([
+            {
+                colSpan: 2,
+                content: 'Grand total',
+                styles: { halign: 'center', fillColor: [41, 128, 185], textColor: 255 },
+            },
+            {
+                colSpan: 1,
+                content: totalTime + 'h',
+                styles: { halign: 'center', fillColor: [22, 160, 133], textColor: 255 },
+            },
+        ]);
+
+        let doc = new jsPDF('p', 'mm', 'a4');
+        doc.autoTable({
+            body: formattedData,
+            theme: 'grid',
+            head: [
+                [
+                    {
+                        content: 'Task',
+                        colSpan: 1,
+                        styles: { halign: 'center', fillColor: [22, 160, 133] },
+                    },
+                    {
+                        content: 'Work log(s)',
+                        colSpan: 1,
+                        styles: { halign: 'center', fillColor: [22, 160, 133] },
+                    },
+                    {
+                        content: 'Time (h)',
+                        colSpan: 1,
+                        styles: { halign: 'center', fillColor: [22, 160, 133] },
+                    }
+                ],
+            ],
+        });
+
+        const pages = doc.internal.getNumberOfPages();
+        const pageWidth = doc.internal.pageSize.width;
+        const pageHeight = doc.internal.pageSize.height;
+        doc.setFontSize(10);
+
+        for (let j = 1; j < pages + 1 ; j++) {
+            doc.setPage(j);
+            doc.text(
+                `${j} of ${pages}`,
+                pageWidth / 2,
+                pageHeight - 10,
+                {
+                    align: 'center'
+                }
+            );
+        }
+
+        PDFObject.embed(doc.output('datauristring'), "#output");
+    }
+</script>
+</body>
+</html>
