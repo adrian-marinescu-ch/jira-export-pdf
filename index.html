@@ -12,7 +12,8 @@
     </style>
 </head>
 <body>
-<input type="file" class="form-control" accept=".csv" id="input">
+<input type="text" id="inputName">
+<input type="file" accept=".csv" id="input">
 <div id="output"></div>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js" integrity="sha256-Ue6wom48SQbpmwW9QIk7pyVDR5Bg36SetP67V2pDkxc=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfobject@2.2.8/pdfobject.min.js" integrity="sha256-tu9j5pBilBQrWSDePOOajCUdz6hWsid/lBNzK4KgEPM=" crossorigin="anonymous"></script>
@@ -23,6 +24,7 @@
     document.addEventListener("DOMContentLoaded", function(){
         window.jsPDF = window.jspdf.jsPDF;
         let fileInput = document.getElementById('input');
+        let inputName = document.getElementById('inputName');
 
         fileInput.addEventListener('change', function () {
             Papa.parse(fileInput.files[0], {
@@ -31,16 +33,15 @@
                     if (results.errors) {
                         console.warn('Parse CSV errors', results.errors);
                     }
-                    constructPdf(results.data);
+                    constructPdf(results.data, inputName.value);
                 }
             });
         }, false);
     });
 
-    function constructPdf(dataArray) {
+    function constructPdf(dataArray, fullName) {
         let groupedData = [];
         let totalTime = 0;
-        let fullName = undefined;
         let startDate = undefined;
         let endDate = undefined;
         dataArray.forEach(function (arrayItem) {
@@ -48,9 +49,6 @@
             let newDate = undefined;
             if (arrayItem['Date Started']) {
                 newDate = Date.parse(arrayItem['Date Started']);
-            }
-            if (arrayItem['Display Name'] && fullName === undefined) {
-                fullName = arrayItem['Display Name'];
             }
             if (newDate !== undefined) {
                 if (startDate === undefined) {
@@ -141,7 +139,7 @@
         doc.setFontSize(10);
 
         if (fullName !== undefined) {
-            doc.text('Full name: ' + fullName, 14, 10);
+            doc.text('Name: ' + fullName, 14, 10);
         }
         if (startDate !== undefined) {
             doc.text('Start date: ' + new Date(startDate).toDateString(), 14, 15);
