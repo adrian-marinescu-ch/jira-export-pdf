@@ -40,8 +40,33 @@
     function constructPdf(dataArray) {
         let groupedData = [];
         let totalTime = 0;
+        let fullName = undefined;
+        let startDate = undefined;
+        let endDate = undefined;
         dataArray.forEach(function (arrayItem) {
             let newTime = parseFloat(arrayItem['Time Spent (h)']);
+            let newDate = undefined;
+            if (arrayItem['Date Started']) {
+                newDate = Date.parse(arrayItem['Date Started']);
+            }
+            if (arrayItem['Display Name'] && fullName === undefined) {
+                fullName = arrayItem['Display Name'];
+            }
+            if (newDate !== undefined) {
+                if (startDate === undefined) {
+                    startDate = newDate;
+                }
+                if (endDate === undefined) {
+                    endDate = newDate;
+                }
+                if (startDate !== undefined && startDate > newDate) {
+                    startDate = newDate;
+                }
+                if (endDate !== undefined && endDate < newDate) {
+                    endDate = newDate;
+                }
+            }
+
             if (arrayItem.Key && newTime > 0) {
                 if (!(arrayItem.Key in groupedData)) {
                     groupedData[arrayItem.Key] = {
@@ -67,13 +92,13 @@
                     {
                         rowSpan: descriptionsLength,
                         content: data.Key,
-                        styles: { valign: 'top', halign: 'left' },
+                        styles: {valign: 'top', halign: 'left'},
                     },
                     data.Descriptions[0],
                     {
                         rowSpan: descriptionsLength,
                         content: data.Time,
-                        styles: { valign: 'top', halign: 'right' },
+                        styles: {valign: 'top', halign: 'right'},
                     }
                 ]);
                 for (let i = 1; i < descriptionsLength; i++) {
@@ -86,13 +111,13 @@
                     {
                         rowSpan: 1,
                         content: data.Key,
-                        styles: { valign: 'top', halign: 'left' },
+                        styles: {valign: 'top', halign: 'left'},
                     },
                     data.Descriptions[0],
                     {
                         rowSpan: 1,
                         content: data.Time,
-                        styles: { valign: 'top', halign: 'right' },
+                        styles: {valign: 'top', halign: 'right'},
                     }
                 ]);
             }
@@ -102,17 +127,31 @@
             {
                 colSpan: 2,
                 content: 'Grand total',
-                styles: { halign: 'center', fillColor: [41, 128, 185], textColor: 255 },
+                styles: {halign: 'center', fillColor: [41, 128, 185], textColor: 255},
             },
             {
                 colSpan: 1,
                 content: totalTime + 'h',
-                styles: { halign: 'center', fillColor: [22, 160, 133], textColor: 255 },
+                styles: {halign: 'center', fillColor: [22, 160, 133], textColor: 255},
             },
         ]);
 
         let doc = new jsPDF('p', 'mm', 'a4');
+
+        doc.setFontSize(10);
+
+        if (fullName !== undefined) {
+            doc.text('Full name: ' + fullName, 14, 10);
+        }
+        if (startDate !== undefined) {
+            doc.text('Start date: ' + new Date(startDate).toDateString(), 14, 15);
+        }
+        if (endDate !== undefined) {
+            doc.text('End date: ' + new Date(endDate).toDateString(), 14, 20);
+        }
+
         doc.autoTable({
+            startY: 25,
             body: formattedData,
             theme: 'grid',
             head: [
@@ -120,17 +159,17 @@
                     {
                         content: 'Task',
                         colSpan: 1,
-                        styles: { halign: 'center', fillColor: [22, 160, 133] },
+                        styles: {halign: 'center', fillColor: [22, 160, 133]},
                     },
                     {
                         content: 'Work log(s)',
                         colSpan: 1,
-                        styles: { halign: 'center', fillColor: [22, 160, 133] },
+                        styles: {halign: 'center', fillColor: [22, 160, 133]},
                     },
                     {
                         content: 'Time (h)',
                         colSpan: 1,
-                        styles: { halign: 'center', fillColor: [22, 160, 133] },
+                        styles: {halign: 'center', fillColor: [22, 160, 133]},
                     }
                 ],
             ],
@@ -141,7 +180,7 @@
         const pageHeight = doc.internal.pageSize.height;
         doc.setFontSize(10);
 
-        for (let j = 1; j < pages + 1 ; j++) {
+        for (let j = 1; j < pages + 1; j++) {
             doc.setPage(j);
             doc.text(
                 `${j} of ${pages}`,
