@@ -33,7 +33,6 @@
                     if (results.errors) {
                         console.warn('Parse CSV errors', results.errors);
                     }
-                    console.log(results.data);
                     constructPdf(results.data, inputName.value);
                 }
             });
@@ -92,16 +91,16 @@
                     {
                         rowSpan: descriptionsLength + 1,
                         content: data.Key,
-                        styles: {valign: 'top', halign: 'left', fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold'},
+                        styles: {valign: 'top', halign: 'left', fillColor: [46,139,87], textColor: 255, fontStyle: 'bold'},
                     },
                     {
                         content: data.Name,
-                        styles: {valign: 'top', halign: 'left', fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold'},
+                        styles: {valign: 'top', halign: 'left', fillColor: [46,139,87], textColor: 255, fontStyle: 'bold'},
                     },
                     {
                         rowSpan: descriptionsLength + 1,
                         content: data.Time,
-                        styles: {valign: 'top', halign: 'right', fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold'},
+                        styles: {valign: 'top', halign: 'right', fillColor: [46,139,87], textColor: 255, fontStyle: 'bold'},
                     }
                 ]);
                 for (let i = 0; i < descriptionsLength; i++) {
@@ -113,20 +112,21 @@
                 }
             } else {
                 let multipleRows = data.Descriptions[0] && data.Descriptions[0].length > 0;
+                let color = multipleRows ? [34,139,34] : [46,139,87];
                 formattedData.push([
                     {
                         rowSpan: multipleRows ? 2 : 1,
                         content: data.Key,
-                        styles: {valign: 'top', halign: 'left', fillColor: [51, 45, 120], textColor: 255, fontStyle: 'bold'},
+                        styles: {valign: 'top', halign: 'left', fillColor: color, textColor: 255, fontStyle: 'bold'},
                     },
                     {
                         content: data.Name,
-                        styles: {valign: 'top', halign: 'left', fillColor: [51, 45, 120], textColor: 255, fontStyle: 'bold'},
+                        styles: {valign: 'top', halign: 'left', fillColor: color, textColor: 255, fontStyle: 'bold'},
                     },
                     {
                         rowSpan: multipleRows ? 2 : 1,
                         content: data.Time,
-                        styles: {valign: 'top', halign: 'right', fillColor: [51, 45, 120], textColor: 255, fontStyle: 'bold'},
+                        styles: {valign: 'top', halign: 'right', fillColor: color, textColor: 255, fontStyle: 'bold'},
                     }
                 ]);
                 if (multipleRows) {
@@ -146,7 +146,7 @@
             {
                 colSpan: 1,
                 content: totalTime + 'h',
-                styles: {halign: 'center', fillColor: [22, 160, 133], textColor: 255},
+                styles: {halign: 'center', fillColor: [128,128,0], textColor: 255},
             },
         ]);
 
