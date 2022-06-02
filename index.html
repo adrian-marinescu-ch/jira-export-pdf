@@ -33,6 +33,7 @@
                     if (results.errors) {
                         console.warn('Parse CSV errors', results.errors);
                     }
+                    console.log(results.data);
                     constructPdf(results.data, inputName.value);
                 }
             });
@@ -69,6 +70,7 @@
                 if (!(arrayItem.Key in groupedData)) {
                     groupedData[arrayItem.Key] = {
                         'Key': arrayItem['Key'],
+                        'Name': arrayItem['Summary'],
                         'Descriptions': [
                             arrayItem['Work Description']
                         ],
@@ -88,36 +90,50 @@
             if (descriptionsLength > 1) {
                 formattedData.push([
                     {
-                        rowSpan: descriptionsLength,
+                        rowSpan: descriptionsLength + 1,
                         content: data.Key,
-                        styles: {valign: 'top', halign: 'left'},
+                        styles: {valign: 'top', halign: 'left', fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold'},
                     },
-                    data.Descriptions[0],
                     {
-                        rowSpan: descriptionsLength,
+                        content: data.Name,
+                        styles: {valign: 'top', halign: 'left', fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold'},
+                    },
+                    {
+                        rowSpan: descriptionsLength + 1,
                         content: data.Time,
-                        styles: {valign: 'top', halign: 'right'},
+                        styles: {valign: 'top', halign: 'right', fillColor: [155, 89, 182], textColor: 255, fontStyle: 'bold'},
                     }
                 ]);
-                for (let i = 1; i < descriptionsLength; i++) {
-                    formattedData.push([
-                        data.Descriptions[i]
-                    ]);
+                for (let i = 0; i < descriptionsLength; i++) {
+                    if (data.Descriptions[i] && data.Descriptions[i].length > 0) {
+                        formattedData.push([
+                            data.Descriptions[i],
+                        ]);
+                    }
                 }
             } else {
+                let multipleRows = data.Descriptions[0] && data.Descriptions[0].length > 0;
                 formattedData.push([
                     {
-                        rowSpan: 1,
+                        rowSpan: multipleRows ? 2 : 1,
                         content: data.Key,
-                        styles: {valign: 'top', halign: 'left'},
+                        styles: {valign: 'top', halign: 'left', fillColor: [51, 45, 120], textColor: 255, fontStyle: 'bold'},
                     },
-                    data.Descriptions[0],
                     {
-                        rowSpan: 1,
+                        content: data.Name,
+                        styles: {valign: 'top', halign: 'left', fillColor: [51, 45, 120], textColor: 255, fontStyle: 'bold'},
+                    },
+                    {
+                        rowSpan: multipleRows ? 2 : 1,
                         content: data.Time,
-                        styles: {valign: 'top', halign: 'right'},
+                        styles: {valign: 'top', halign: 'right', fillColor: [51, 45, 120], textColor: 255, fontStyle: 'bold'},
                     }
                 ]);
+                if (multipleRows) {
+                    formattedData.push([
+                        data.Descriptions[0],
+                    ]);
+                }
             }
         });
 
