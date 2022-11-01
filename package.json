@@ -1,0 +1,35 @@
+{
+  "name": "jira-export-pdf",
+  "version": "1.0.0",
+  "description": "Generate PDF Table export from CSV exported from Jira Timesheet Reports plugin",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adrian-marinescu-ch/jira-export-pdf.git"
+  },
+  "keywords": [
+    "jira",
+    "csv",
+    "pdf",
+    "table",
+    "javascript",
+    "js",
+    "tempo",
+    "timesheet-reports-and-gadgets",
+    "cloud"
+  ],
+  "author": "Adrian Marinescu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adrian-marinescu-ch/jira-export-pdf/issues"
+  },
+  "homepage": "https://github.com/adrian-marinescu-ch/jira-export-pdf#readme",
+  "dependencies": {
+    "papaparse": "^5.3.2",
+    "pdfmake": "^0.2.6",
+    "pdfobject": "^2.2.8"
+  }
+}
